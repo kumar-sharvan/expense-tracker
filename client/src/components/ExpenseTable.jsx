@@ -2,8 +2,10 @@ import API from "../api/axiosInstance";
 
 export default function ExpenseTable({ expenses, refresh }) {
     const deleteExpense = async (id) => {
-        await API.delete(`/expenses/${id}`);
-        refresh();
+        if (window.confirm("Are you sure you want to delete this expense?")) {
+            await API.delete(`/expenses/${id}`);
+            refresh();
+        }
     };
 
     return (
@@ -30,7 +32,7 @@ export default function ExpenseTable({ expenses, refresh }) {
                             <td className="p-3">{e.category}</td>
                             <td className="p-3">
                                 <span className={`px-2 py-1 rounded-full text-xs font-medium
-                                    ${e.type === "Income" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}
+                                    ${e.type === "CREDIT" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}
                                 `}>
                                     {e.type}
                                 </span>

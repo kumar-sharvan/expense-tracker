@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import API from "../api/axiosInstance";
-// ...existing code...
+
 export default function AddExpenseModal({ refresh }) {
     const [open, setOpen] = useState(false);
     const [saving, setSaving] = useState(false);
@@ -28,7 +28,7 @@ export default function AddExpenseModal({ refresh }) {
             refresh();
             setForm((f) => ({ ...f, amount: "", category: "", description: "" }));
         } catch (err) {
-            // handle error as needed
+            
             console.error(err);
         } finally {
             setSaving(false);
@@ -56,7 +56,7 @@ export default function AddExpenseModal({ refresh }) {
                         aria-modal="true"
                         aria-labelledby="add-expense-title"
                     >
-                        {/* Cross button top-right */}
+                        
                         <button
                             onClick={() => setOpen(false)}
                             className="absolute top-3 right-3 text-gray-500 hover:text-gray-800 rounded-full p-1 focus:outline-none focus:ring-2 focus:ring-blue-400"
@@ -138,4 +138,3 @@ export default function AddExpenseModal({ refresh }) {
         </>
     );
 }
-// ...existing code...

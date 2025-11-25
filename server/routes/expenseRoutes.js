@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken"; // <-- added import
 
 const router = express.Router();
 
-const JWT_SECRET = process.env.JWT_SECRET || "change_this_secret";
+const JWT_SECRET = process.env.JWT_SECRET;
 
 // helper: token middleware
 const auth = async (req, res, next) => {
