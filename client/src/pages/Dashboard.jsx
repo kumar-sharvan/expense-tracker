@@ -1,5 +1,6 @@
+// src/pages/Dashboard.jsx
 import { useCallback, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom"; // Add this import
+import { useNavigate } from "react-router-dom";
 import API from "../api/axiosInstance";
 import Navbar from "../components/Navbar";
 import Filters from "../components/Filters";
@@ -10,6 +11,7 @@ import AddExpenseModal from "../components/AddExpenseModal";
 export default function Dashboard() {
   const [expenses, setExpenses] = useState([]);
   const [summary, setSummary] = useState({});
+  const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState({
     frequency: "ALL",
     type: "ALL",
@@ -23,18 +25,49 @@ export default function Dashboard() {
     const token = localStorage.getItem("token");
     if (!token) {
       navigate("/");
+      return;
     }
   }, [navigate]);
 
+  // Helper to remove empty query params
+  const cleanParams = (params) => {
+    const p = { ...params };
+    if (!p.from) delete p.from;
+    if (!p.to) delete p.to;
+    if (!p.frequency) delete p.frequency;
+    if (!p.type) delete p.type;
+    return p;
+  };
+
   const fetchExpenses = useCallback(async () => {
-    const res = await API.get("/expenses", { params: filters });
-    setExpenses(res.data.expenses);
-  }, [filters]);
+    try {
+      setLoading(true);
+      const res = await API.get("/expenses", { params: cleanParams(filters) });
+      setExpenses(res.data.expenses || []);
+    } catch (err) {
+      console.error("Fetch expenses error:", err);
+      // Optional: handle unauthorized -> redirect to login
+      if (err?.response?.status === 401) {
+        localStorage.removeItem("token");
+        navigate("/");
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [filters, navigate]);
 
   const fetchSummary = useCallback(async () => {
-    const res = await API.get("/summary", { params: filters });
-    setSummary(res.data);
-  }, [filters]);
+    try {
+      const res = await API.get("/summary", { params: cleanParams(filters) });
+      setSummary(res.data || {});
+    } catch (err) {
+      console.error("Fetch summary error:", err);
+      if (err?.response?.status === 401) {
+        localStorage.removeItem("token");
+        navigate("/");
+      }
+    }
+  }, [filters, navigate]);
 
   useEffect(() => {
     fetchExpenses();
@@ -51,7 +84,7 @@ export default function Dashboard() {
       <Filters filters={filters} setFilters={setFilters} />
       <SummaryCards summary={summary} />
       <AddExpenseModal refresh={refreshData} />
-      <ExpenseTable expenses={expenses} refresh={refreshData} />
+      {loading ? <div className="text-center my-4 text-2xl">Loading...</div> : <ExpenseTable expenses={expenses} refresh={refreshData} />}
     </div>
   );
 }

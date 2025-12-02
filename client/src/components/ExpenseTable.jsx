@@ -1,10 +1,19 @@
+// src/components/ExpenseTable.jsx
+import { useState } from "react";
 import API from "../api/axiosInstance";
 
 export default function ExpenseTable({ expenses, refresh }) {
+
+
+
     const deleteExpense = async (id) => {
-        if (window.confirm("Are you sure you want to delete this expense?")) {
+        if (!window.confirm("Are you sure you want to delete this expense?")) return;
+        try {
             await API.delete(`/expenses/${id}`);
-            refresh();
+            await refresh();
+        } catch (err) {
+            console.error("Delete expense error:", err);
+            alert(err?.response?.data?.message || "Failed to delete expense");
         }
     };
 
@@ -23,17 +32,15 @@ export default function ExpenseTable({ expenses, refresh }) {
                 </thead>
                 <tbody>
                     {expenses.map((e) => (
-                        <tr
-                            key={e.id}
-                            className="bg-white hover:bg-blue-50 transition-colors shadow-sm rounded-xl"
-                        >
+                        <tr key={e.id} className="bg-white hover:bg-blue-50 transition-colors shadow-sm rounded-xl">
                             <td className="p-3 rounded-l-xl">{e.expense_date}</td>
                             <td className="p-3">{e.amount}</td>
                             <td className="p-3">{e.category}</td>
                             <td className="p-3">
-                                <span className={`px-2 py-1 rounded-full text-xs font-medium
-                                    ${e.type === "CREDIT" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}
-                                `}>
+                                <span
+                                    className={`px-2 py-1 rounded-full text-xs font-medium ${e.type === "CREDIT" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+                                        }`}
+                                >
                                     {e.type}
                                 </span>
                             </td>

@@ -1,3 +1,4 @@
+// src/components/AddExpenseModal.jsx
 import { useState, useEffect } from "react";
 import API from "../api/axiosInstance";
 
@@ -21,15 +22,31 @@ export default function AddExpenseModal({ refresh }) {
     }, []);
 
     const saveExpense = async () => {
+        // basic validation
+        if (!form.amount || isNaN(parseFloat(form.amount))) {
+            alert("Please enter a valid amount");
+            return;
+        }
+        if (!form.category) {
+            alert("Please select a category");
+            return;
+        }
+
         try {
             setSaving(true);
-            await API.post("/expenses", form);
+            await API.post("/expenses", {
+                amount: form.amount,
+                category: form.category,
+                type: form.type,
+                description: form.description,
+                expense_date: form.expense_date,
+            });
             setOpen(false);
-            refresh();
+            await refresh();
             setForm((f) => ({ ...f, amount: "", category: "", description: "" }));
         } catch (err) {
-            
-            console.error(err);
+            console.error("Save expense error:", err);
+            alert(err?.response?.data?.message || "Failed to save expense");
         } finally {
             setSaving(false);
         }
@@ -56,7 +73,6 @@ export default function AddExpenseModal({ refresh }) {
                         aria-modal="true"
                         aria-labelledby="add-expense-title"
                     >
-                        
                         <button
                             onClick={() => setOpen(false)}
                             className="absolute top-3 right-3 text-gray-500 hover:text-gray-800 rounded-full p-1 focus:outline-none focus:ring-2 focus:ring-blue-400"
@@ -67,7 +83,9 @@ export default function AddExpenseModal({ refresh }) {
                             </svg>
                         </button>
 
-                        <h2 id="add-expense-title" className="text-lg font-semibold text-gray-800">Add Expense</h2>
+                        <h2 id="add-expense-title" className="text-lg font-semibold text-gray-800">
+                            Add Expense
+                        </h2>
 
                         <div className="grid grid-cols-1 gap-3">
                             <input
